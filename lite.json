@@ -1,0 +1,30 @@
+[
+  {
+    "HIDKeyboardModifierMappingSrc": 30064771121,
+    "HIDKeyboardModifierMappingDst": 30064771120
+  },
+  {
+    "HIDKeyboardModifierMappingSrc": 30064771120,
+    "HIDKeyboardModifierMappingDst": 30064771119
+  },
+  {
+    "HIDKeyboardModifierMappingSrc": 30064771126,
+    "HIDKeyboardModifierMappingDst": 30064771127
+  },
+  {
+    "HIDKeyboardModifierMappingSrc": 30064771114,
+    "HIDKeyboardModifierMappingDst": 30064771121
+  },
+  {
+    "HIDKeyboardModifierMappingSrc": 30064771119,
+    "HIDKeyboardModifierMappingDst": 30064771114
+  },
+  {
+    "HIDKeyboardModifierMappingSrc": 30064771127,
+    "HIDKeyboardModifierMappingDst": 30064771123
+  },
+  {
+    "HIDKeyboardModifierMappingSrc": 30064771123,
+    "HIDKeyboardModifierMappingDst": 30064771126
+  }
+]
