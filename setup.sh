@@ -43,6 +43,9 @@ lite-off)
   exit 0 ;;
 restore)
   [ -f "$STATE" ] || { echo "没有找到安装记录（$STATE），无需还原" >&2; exit 1; }
+  if [ "${KEYMAP_SKIP_APP:-0}" != "1" ] && [ -f "$BIN_DIR/karabiner-input-source.py" ]; then
+    /usr/bin/python3 "$BIN_DIR/karabiner-input-source.py" uninstall
+  fi
   cp "$CFG" "$CFG.bak-$(date +%Y%m%d-%H%M%S)"
   CFG="$CFG" STATE="$STATE" python3 - <<'PY'
 import json, os
@@ -130,6 +133,8 @@ print(f'已注入 profile: {", ".join(names)}（选中 {main}）'
 PY
 
 if [ "${KEYMAP_SKIP_APP:-0}" != "1" ]; then
+  KEYMAP_INPUT_SOURCE_SWIFT="$(fetch select-input-source.swift)" \
+    /usr/bin/python3 "$(fetch karabiner-input-source.py)" install
   open -a Karabiner-Elements || true
   cat <<'EOF'
 

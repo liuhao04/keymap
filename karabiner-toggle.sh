@@ -4,6 +4,9 @@
 # 另一个认作「启用」档，所以在 Karabiner 里随意改名不影响本脚本。
 # Karabiner 进程与虚拟驱动保持运行；状态看菜单栏 profile 名（show_profile_name_in_menu_bar）。
 CLI='/Library/Application Support/org.pqrs/Karabiner-Elements/bin/karabiner_cli'
+SELECTOR="$(dirname "$0")/keymap-select-input-source"
+# 兼容尚未安装原生切换工具的旧部署。
+[ -x "$SELECTOR" ] || SELECTOR=/opt/homebrew/bin/macism
 
 names="$(/usr/bin/python3 - <<'PY'
 import json, os
@@ -25,9 +28,11 @@ ON="$(printf '%s\n' "$names" | sed -n 2p)"
 
 cur="$("$CLI" --show-current-profile-name)"
 if [ "$cur" = "$OFF" ]; then
-  "$CLI" --select-profile "$ON"
+  "$CLI" --select-profile "$ON" || exit 1
+  # 切到启用档时，输入法同步切到 InputStudio。
+  "$SELECTOR" com.liuhao.inputmethod.InputStudio.Wubi
 else
-  "$CLI" --select-profile "$OFF"
-  # 切到停用档时，输入法同步退回系统自带简体拼音（macism 对 CJK 切换做过兼容处理）
-  /opt/homebrew/bin/macism com.apple.inputmethod.SCIM.ITABC >/dev/null 2>&1
+  "$CLI" --select-profile "$OFF" || exit 1
+  # 切到停用档时，输入法同步退回系统自带简体拼音。
+  "$SELECTOR" com.apple.inputmethod.SCIM.ITABC
 fi
