@@ -21,11 +21,19 @@ bash <(curl -fsSL https://raw.githubusercontent.com/liuhao04/keymap/main/setup.s
 完整安装需要对方机器的管理员密码（装驱动），且有两步 GUI 授权必须手动点
 （系统扩展批准、输入监控），脚本结束时会打印清单。
 
-`fn+Esc` 切到启用档（`on`）时自动切换到 InputStudio，切到停用档（`off`）时
-切回系统简体拼音；输入法联动使用 macOS 原生输入源 API，需要已安装、启用对应输入法。
-安装时用 Xcode Command Line Tools 编译小型切换工具，运行时不依赖 `macism`。
-完整安装还会启用菜单栏切换监听：手动选择 `on` 同样会切到 InputStudio。
-仅在进入启用档时切换一次，此后手动选择其他输入法不会被改回；登录后也会自动启动监听。
+`fn+Esc` 和菜单栏切换 profile 使用同一套双向联动：
+
+- 进入 `on` → InputStudio。
+- 进入 `off` → 系统简体拼音。
+
+原生 Swift 程序用系统文件事件监听 profile 变化，通过 macOS 输入源 API 切换输入法，
+由用户级 LaunchAgent 随登录启动。空闲时不轮询，运行时不依赖 Python、`macism` 或 Homebrew。
+安装时需要 Xcode Command Line Tools 和 Python 3，并已安装、启用对应输入法。
+每次进入 profile 只切换一次，此后手动选择其他输入法不会被改回；其他 profile 不受影响。
+启动监听时也会按当前 profile 同步一次。
+
+`select_input_source` 只能作为按键规则动作，不能单独覆盖菜单栏切换。
+因此 `fn+Esc` 只负责切换 profile，输入法切换统一交给监听器，避免两条路径重复执行。
 
 本机已有 profile、只需安装或更新监听时，在仓库目录执行：
 
@@ -51,7 +59,8 @@ bash <(curl -fsSL https://raw.githubusercontent.com/liuhao04/keymap/main/setup.s
 - `setup.sh` — 部署/还原入口（install / lite / lite-off / restore）
 - `profiles.json` — 我的 Karabiner profile（`__TOGGLE__` 为占位符，安装时按目标机器改写）
 - `lite.json` — hidutil UserKeyMapping（由 simple_modifications 生成）
-- `karabiner-toggle.sh` — fn+Esc 启停脚本（profile 名免疫，按规则数识别启停档）
-- `karabiner-input-source.py` — 菜单栏 profile 变化监听及用户级 LaunchAgent 安装/移除
-- `select-input-source.swift` — 原生输入源切换工具（安装时编译）
+- `karabiner-toggle.sh` — fn+Esc 入口（调用原生程序切换 profile）
+- `karabiner-input-source.swift` — 原生 profile 监听、输入源切换及 profile 切换程序
+- `karabiner-input-source.py` — 编译、安装/移除用户级 LaunchAgent，仅安装时使用
+- `test-input-source.swift` — 双向联动、改名与其他 profile 隔离的回归测试
 - `push.sh` — 从本机配置重新生成上述两个 json 并推送

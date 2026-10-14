@@ -133,7 +133,7 @@ print(f'已注入 profile: {", ".join(names)}（选中 {main}）'
 PY
 
 if [ "${KEYMAP_SKIP_APP:-0}" != "1" ]; then
-  KEYMAP_INPUT_SOURCE_SWIFT="$(fetch select-input-source.swift)" \
+  KEYMAP_INPUT_SOURCE_SWIFT="$(fetch karabiner-input-source.swift)" \
     /usr/bin/python3 "$(fetch karabiner-input-source.py)" install
   open -a Karabiner-Elements || true
   cat <<'EOF'
