@@ -3,6 +3,11 @@ import Foundation
 @main
 struct ProfileSyncTests {
     static func main() throws {
+        precondition(missingInputSources(available: [inputStudio, systemPinyin]).isEmpty)
+        precondition(missingInputSources(available: [systemPinyin]) == ["InputStudio"])
+        precondition(missingInputSources(available: [inputStudio]) == ["系统简体拼音"])
+        precondition(missingInputSources(available: []).count == 2)
+        print("PASS missing input-source diagnostics")
         let template = try JSONSerialization.jsonObject(with: Data(contentsOf:
             URL(fileURLWithPath: CommandLine.arguments[1]))) as! [[String: Any]]
         func config(_ selected: String?, on: String = "on", off: String = "off") throws -> ProfileConfig {

@@ -55,6 +55,28 @@ func sourceID(_ source: TISInputSource) -> String {
         .takeUnretainedValue() as String
 }
 
+func missingInputSources(available: Set<String>) -> [String] {
+    [(inputStudio, "InputStudio"), (systemPinyin, "系统简体拼音")]
+        .filter { !available.contains($0.0) }.map { $0.1 }
+}
+
+func checkInputSources() -> Bool {
+    let sources = TISCreateInputSourceList(nil, false).takeRetainedValue() as! [TISInputSource]
+    let available = Set(sources.filter { source in
+        guard let value = TISGetInputSourceProperty(source, kTISPropertyInputSourceIsSelectCapable) else { return false }
+        return CFBooleanGetValue(Unmanaged<CFBoolean>.fromOpaque(value).takeUnretainedValue())
+    }.map(sourceID))
+    let missing = missingInputSources(available: available)
+    if !missing.isEmpty {
+        fputs("安装前检查失败：缺少已启用的输入法：\(missing.joined(separator: "、"))。\n"
+            + "请先安装 InputStudio，并在系统设置的输入法列表中添加/启用以上输入法，然后重试。\n"
+            + "本脚本不会安装 InputStudio，也不会自动启用输入法。\n", stderr)
+        return false
+    }
+    print("输入法检查通过：InputStudio、系统简体拼音均已启用（未切换输入法）")
+    return true
+}
+
 func selectInputSource(_ requested: String) throws {
     let current = TISCopyCurrentKeyboardInputSource().takeRetainedValue()
     if sourceID(current) == requested { return }
@@ -135,6 +157,8 @@ struct KeymapInputSource {
     static func main() {
         do {
             switch Array(CommandLine.arguments.dropFirst()) {
+            case ["--check-input-sources"]:
+                exit(checkInputSources() ? 0 : 1)
             case ["--watch"]:
                 let watcher = ProfileWatcher()
                 watcher.reconcile()
@@ -153,7 +177,7 @@ struct KeymapInputSource {
             case let args where args.count == 1 && !args[0].hasPrefix("--"):
                 try selectInputSource(args[0])
             default:
-                fputs("用法: keymap-input-source [--watch|--toggle|输入源ID]\n", stderr)
+                fputs("用法: keymap-input-source [--watch|--toggle|--check-input-sources|输入源ID]\n", stderr)
                 exit(1)
             }
         } catch {
